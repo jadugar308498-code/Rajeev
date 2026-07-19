@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rajeev Cosmetics Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --plum:#2A0F29;
+    --plum-2:#3D1638;
+    --ivory:#FFF8F2;
+    --paper:#FFFDF8;
+    --ink:#241119;
+    --taupe:#7A6159;
+    --taupe-light:#B79E93;
+    --gold:#E8A33D;
+    --gold-light:#F4CB8A;
+    --rani:#C81259;
+    --rani-dark:#9E0E46;
+    --line:#E4D3C6;
+    --shadow: 0 12px 32px rgba(42,15,41,0.14);
+    --radius: 4px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+  body{
+    margin:0;
+    font-family:'Work Sans', sans-serif;
+    color:var(--ink);
+    background:var(--ivory);
+    line-height:1.5;
+  }
+  h1,h2,h3,.display{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    line-height:1.08;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  a{color:inherit;}
+  button{font-family:inherit; cursor:pointer;}
+  img{max-width:100%; display:block;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(255,248,242,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-row{display:flex; align-items:center; justify-content:space-between; padding:14px 0; gap:16px;}
+  .brand{display:flex; flex-direction:column; gap:0;}
+  .brand-name{font-size:22px; font-weight:700; color:var(--plum);}
+  .brand-tag{font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--rani); font-weight:600;}
+  nav.links{display:flex; gap:26px; list-style:none; margin:0; padding:0;}
+  nav.links a{
+    font-size:14px; font-weight:600; text-decoration:none; color:var(--ink);
+    padding:6px 2px; border-bottom:2px solid transparent;
+  }
+  nav.links a:hover{border-bottom-color:var(--gold);}
+  .nav-actions{display:flex; align-items:center; gap:10px;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:10px 18px; border-radius:var(--radius); border:1.5px solid transparent;
+    font-weight:600; font-size:14px; text-decoration:none; transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--rani); color:#fff;}
+  .btn-primary:hover{background:var(--rani-dark);}
+  .btn-gold{background:var(--gold); color:var(--plum);}
+  .btn-gold:hover{background:var(--gold-light);}
+  .btn-outline{background:transparent; border-color:var(--plum); color:var(--plum);}
+  .btn-outline:hover{background:var(--plum); color:#fff;}
+  .btn-sm{padding:7px 12px; font-size:13px;}
+  .menu-toggle{display:none; background:none; border:none; font-size:22px; color:var(--plum);}
+
+  /* ---------- Status strip ---------- */
+  .status-strip{background:var(--plum); color:#fff;}
+  .status-inner{display:flex; align-items:center; justify-content:center; gap:10px; padding:8px 0; font-size:13px; font-weight:500;}
+  .dot{width:9px; height:9px; border-radius:50%; display:inline-block;}
+  .dot.owner{background:#5FD98A;}
+  .dot.staff{background:#5FA8F5;}
+  .dot.closed{background:#C4A6B7;}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    background:linear-gradient(160deg, var(--plum) 0%, var(--plum-2) 62%, #4A1A45 100%);
+    color:var(--ivory); padding:72px 0 88px; position:relative; overflow:hidden;
+  }
+  .hero::after{
+    content:""; position:absolute; right:-120px; top:-140px; width:420px; height:420px;
+    border-radius:50%; background:radial-gradient(circle, rgba(232,163,61,0.35), transparent 70%);
+  }
+  .hero-grid{display:grid; grid-template-columns:1.15fr 0.85fr; gap:48px; align-items:center; position:relative;}
+  .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold-light); margin-bottom:14px; display:block;}
+  .hero h1{font-size:clamp(34px, 5vw, 54px); color:#fff;}
+  .hero h1 em{font-style:italic; color:var(--gold-light);}
+  .hero p.lede{font-size:17px; color:#EBD9E3; max-width:480px; margin:18px 0 30px;}
+  .hero-actions{display:flex; flex-wrap:wrap; gap:12px;}
+  .hero-card{
+    background:var(--paper); color:var(--ink); border-radius:10px; padding:26px;
+    box-shadow:var(--shadow); transform:rotate(-2deg);
+  }
+  .hero-card .mono{font-size:12px; color:var(--taupe);}
+  .hero-card h3{font-size:19px; margin:6px 0 14px;}
+  .hero-stat-row{display:flex; justify-content:space-between; border-top:1px dashed var(--line); padding-top:12px; margin-top:12px; font-size:13px;}
+
+  /* ---------- Section shells ---------- */
+  section{padding:64px 0;}
+  .section-head{max-width:620px; margin-bottom:36px;}
+  .section-head .eyebrow{color:var(--rani);}
+  .section-head h2{font-size:clamp(26px,3.4vw,36px); color:var(--plum);}
+  .section-head p{color:var(--taupe); margin-top:10px; font-size:15px;}
+
+  /* ---------- Category chips ---------- */
+  .chip-row{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:28px;}
+  .chip{
+    padding:9px 16px; border-radius:999px; border:1.5px solid var(--line); background:var(--paper);
+    font-size:13px; font-weight:600; color:var(--taupe);
+  }
+  .chip.active{background:var(--rani); border-color:var(--rani); color:#fff;}
+
+  /* ---------- Shop layout ---------- */
+  .shop-layout{display:grid; grid-template-columns:220px 1fr; gap:36px; align-items:start;}
+  .filters{background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:20px; position:sticky; top:90px;}
+  .filters h4{font-size:12px; text-transform:uppercase; letter-spacing:0.08em; color:var(--taupe); margin-bottom:10px;}
+  .filters label{display:block; font-size:13px; margin-bottom:8px; font-weight:500;}
+  .filters select, .filters input[type=range]{width:100%;}
+  .filters .filter-group{margin-bottom:22px;}
+  .price-out{font-size:12px; color:var(--taupe); font-family:'IBM Plex Mono', monospace;}
+
+  .product-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:20px;}
+  .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:10px; overflow:hidden;
+    display:flex; flex-direction:column; transition:box-shadow .2s ease, transform .2s ease;
+  }
+  .card:hover{box-shadow:var(--shadow); transform:translateY(-3px);}
+  .card img{aspect-ratio:1/1; object-fit:cover; background:#F1E2D6;}
+  .card-body{padding:14px 16px 16px; display:flex; flex-direction:column; gap:8px; flex:1;}
+  .card-tags{display:flex; gap:6px; flex-wrap:wrap;}
+  .tag{font-size:10px; text-transform:uppercase; letter-spacing:0.04em; background:#F1E2D6; color:var(--plum); padding:3px 8px; border-radius:999px; font-weight:600;}
+  .card-name{font-size:15px; font-weight:600; margin-top:2px;}
+  .card-bottom{display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:8px;}
+  .price{font-family:'IBM Plex Mono', monospace; font-weight:600; color:var(--plum); font-size:15px;}
+  .add-btn{background:var(--plum); color:#fff; border:none; border-radius:6px; padding:8px 14px; font-size:13px; font-weight:600;}
+  .add-btn:hover{background:var(--rani);}
+  .empty-note{grid-column:1/-1; color:var(--taupe); font-size:14px; padding:30px; text-align:center; border:1px dashed var(--line); border-radius:10px;}
+
+  /* ---------- Receipt / Bill ---------- */
+  .bill-section{background:var(--plum);}
+  .bill-layout{display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start;}
+  .bill-copy .eyebrow{color:var(--gold-light);}
+  .bill-copy h2{color:#fff;}
+  .bill-copy p{color:#E8D6DF; margin-top:10px; font-size:15px; max-width:420px;}
+  .bill-copy ul{margin:20px 0 0; padding:0; list-style:none; color:#E8D6DF; font-size:14px;}
+  .bill-copy li{padding:6px 0; border-bottom:1px dashed rgba(255,255,255,0.15); display:flex; gap:10px;}
+
+  .receipt{
+    background:var(--paper); color:var(--ink); border-radius:2px; padding:26px 24px 30px;
+    box-shadow:0 20px 45px rgba(0,0,0,0.35); position:relative;
+    background-image: repeating-linear-gradient(to bottom, transparent 0 27px, rgba(0,0,0,0.035) 27px 28px);
+  }
+  .receipt::before{
+    content:""; position:absolute; left:0; right:0; bottom:-9px; height:18px;
+    background: repeating-linear-gradient(-45deg, var(--paper) 0 9px, transparent 9px 18px);
+  }
+  .receipt-head{text-align:center; border-bottom:1px dashed var(--line); padding-bottom:12px; margin-bottom:12px;}
+  .receipt-head .store{font-family:'Fraunces', serif; font-weight:700; font-size:18px; color:var(--plum);}
+  .receipt-head .mono{font-size:11px; color:var(--taupe); margin-top:4px;}
+  #billItems{min-height:60px;}
+  .bill-row{display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center; font-size:13px; padding:8px 0; border-bottom:1px dotted var(--line);}
+  .bill-row .qty-controls{display:flex; align-items:center; gap:6px;}
+  .qty-controls button{width:22px; height:22px; border:1px solid var(--line); background:#fff; border-radius:4px; font-size:13px; line-height:1;}
+  .bill-empty{font-size:13px; color:var(--taupe); text-align:center; padding:18px 0; font-style:italic;}
+  .bill-totals{border-top:1px dashed var(--line); margin-top:12px; padding-top:12px; font-size:13px; font-family:'IBM Plex Mono', monospace;}
+  .bill-totals .row{display:flex; justify-content:space-between; padding:4px 0;}
+  .bill-totals .grand{font-size:16px; font-weight:700; color:var(--plum); border-top:1px solid var(--ink); margin-top:6px; padding-top:8px;}
+  .receipt-actions{display:flex; gap:10px; margin-top:18px;}
+  .receipt-actions .btn{flex:1; justify-content:center;}
+
+  /* ---------- Trust ---------- */
+  .trust-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .review-card{background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:22px;}
+  .review-card .stars{color:var(--gold); font-size:14px; margin-bottom:10px;}
+  .review-card p{font-size:14px; color:var(--ink); margin:0 0 14px;}
+  .review-card .who{font-size:12px; color:var(--taupe); font-weight:600;}
+  .badge-row{display:flex; flex-wrap:wrap; gap:14px; margin-top:34px;}
+  .badge-pill{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--plum); background:#F1E2D6; padding:8px 14px; border-radius:999px;}
+
+  /* ---------- About ---------- */
+  .about-layout{display:grid; grid-template-columns:0.8fr 1.2fr; gap:44px; align-items:center;}
+  .about-layout img{border-radius:10px;}
+
+  /* ---------- Visit + Appointment ---------- */
+  .split-section{background:var(--plum-2); color:#fff;}
+  .split-grid{display:grid; grid-template-columns:1fr 1fr; gap:40px;}
+  .info-card{background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:24px;}
+  .info-card h3{color:#fff; font-size:20px; margin-bottom:14px;}
+  .info-row{display:flex; gap:12px; align-items:flex-start; font-size:14px; color:#EAD9E1; padding:8px 0; border-bottom:1px dashed rgba(255,255,255,0.12);}
+  .info-row:last-child{border-bottom:none;}
+  .icon{flex:0 0 auto; width:22px; height:22px;}
+  form.appt{display:flex; flex-direction:column; gap:14px;}
+  form.appt label{font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:var(--gold-light); font-weight:600;}
+  form.appt input, form.appt select{
+    width:100%; padding:11px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.2);
+    background:rgba(255,255,255,0.08); color:#fff; font-size:14px;
+  }
+  form.appt input::placeholder{color:#C9B3C2;}
+  form.appt input:focus, form.appt select:focus{background:rgba(255,255,255,0.14);}
+  .form-msg{font-size:13px; color:var(--gold-light); min-height:18px;}
+
+  /* ---------- Newsletter ---------- */
+  .newsletter{background:var(--ivory); text-align:center;}
+  .newsletter-box{max-width:480px; margin:0 auto;}
+  .newsletter-form{display:flex; gap:10px; margin-top:20px;}
+  .newsletter-form input{flex:1; padding:12px 14px; border-radius:6px; border:1.5px solid var(--line); font-size:14px;}
+
+  /* ---------- Footer ---------- */
+  footer{background:var(--plum); color:#EAD9E1; padding:40px 0 24px; font-size:13px;}
+  .footer-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:32px; margin-bottom:28px;}
+  footer h4{color:#fff; font-size:13px; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:12px;}
+  footer a{text-decoration:none; color:#EAD9E1;}
+  footer a:hover{color:var(--gold-light);}
+  footer details{margin-bottom:8px; color:#EAD9E1;}
+  footer summary{cursor:pointer; font-weight:600;}
+  footer summary::marker{color:var(--gold);}
+  .footer-bottom{border-top:1px solid rgba(255,255,255,0.12); padding-top:16px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; color:#C9B3C2;}
+  .owner-link{background:none; border:none; color:#C9B3C2; text-decoration:underline; font-size:12px;}
+
+  /* ---------- Owner panel ---------- */
+  .owner-panel{display:none; background:var(--paper); border:1px dashed var(--rani); border-radius:8px; padding:16px; margin-top:14px; color:var(--ink);}
+  .owner-panel.open{display:block;}
+  .owner-panel p{font-size:12px; color:var(--taupe); margin:0 0 10px;}
+  .status-btns{display:flex; gap:8px; flex-wrap:wrap;}
+  .status-btns button{padding:7px 12px; border-radius:6px; border:1px solid var(--line); background:#fff; font-size:12px; font-weight:600;}
+  .status-btns button.active{background:var(--rani); color:#fff; border-color:var(--rani);}
+
+  /* ---------- Floating WhatsApp ---------- */
+  .float-wa{
+    position:fixed; bottom:22px; right:22px; z-index:60;
+    background:var(--rani); color:#fff; border-radius:999px; padding:13px 18px;
+    display:flex; align-items:center; gap:8px; box-shadow:0 10px 24px rgba(200,18,89,0.4);
+    text-decoration:none; font-weight:700; font-size:13px;
+  }
+  .float-wa:hover{background:var(--rani-dark);}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 900px){
+    .hero-grid, .about-layout, .split-grid, .bill-layout{grid-template-columns:1fr;}
+    .shop-layout{grid-template-columns:1fr;}
+    .filters{position:static;}
+    .product-grid{grid-template-columns:repeat(2,1fr);}
+    .trust-grid, .footer-grid{grid-template-columns:1fr;}
+    nav.links{display:none;}
+    .menu-toggle{display:block;}
+    .hero-card{transform:none;}
+  }
+  @media (max-width: 540px){
+    .product-grid{grid-template-columns:1fr 1fr;}
+    .nav-actions .btn span.txt{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav-row">
+    <div class="brand">
+      <span class="brand-name">Rajeev Cosmetics Store</span>
+      <span class="brand-tag">Beauty Bhi, Bharosa Bhi</span>
+    </div>
+    <ul class="links">
+      <li><a href="#shop">Shop</a></li>
+      <li><a href="#trust">Reviews</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#visit">Visit / Book</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a class="btn btn-outline btn-sm" href="https://maps.app.goo.gl/byHJzw2TJXMTNQ6B6" target="_blank" rel="noopener"><span class="txt">Directions</span> 📍</a>
+      <a class="btn btn-primary btn-sm" href="https://wa.me/916206968481" target="_blank" rel="noopener"><span class="txt">WhatsApp</span> 💬</a>
+    </div>
+  </div>
+</header>
+
+<div class="status-strip">
+  <div class="wrap status-inner" id="statusStrip">
+    <span class="dot owner"></span> <span id="statusText">Loading store status…</span>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Rajeev Cosmetics Store · Since Day One, In Person</span>
+      <h1>Har Look Ka<br><em>Apna Address.</em></h1>
+      <p class="lede">Genuine products, honest advice, and prices you can trust — from a shop that actually picks up the phone. Order on WhatsApp or walk in for a proper consult.</p>
+      <div class="hero-actions">
+        <a href="#shop" class="btn btn-gold">Browse Products</a>
+        <a href="https://wa.me/916206968481" target="_blank" rel="noopener" class="btn btn-primary">Order on WhatsApp</a>
+        <a href="https://maps.app.goo.gl/byHJzw2TJXMTNQ6B6" target="_blank" rel="noopener" class="btn btn-outline" style="border-color:#fff; color:#fff;">Get Directions</a>
+      </div>
+    </div>
+    <div class="hero-card">
+      <span class="mono">TODAY'S PARCHI</span>
+      <h3>Bestseller — Rose Gold Eyeshadow Palette</h3>
+      <div class="hero-stat-row"><span>Price</span><span class="mono">₹599</span></div>
+      <div class="hero-stat-row"><span>Skin type</span><span class="mono">All types</span></div>
+      <div class="hero-stat-row"><span>In stock</span><span class="mono">Yes — 12 left</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="shop">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Shop</span>
+      <h2>Pick your category, filter it down, add to your bill.</h2>
+      <p>Every item can be added straight to your live bill below and sent to us on WhatsApp — no account needed.</p>
+    </div>
+
+    <div class="chip-row" id="categoryChips"></div>
+
+    <div class="shop-layout">
+      <aside class="filters">
+        <div class="filter-group">
+          <h4>Skin Type</h4>
+          <select id="skinFilter">
+            <option value="all">All skin types</option>
+            <option value="oily">Oily</option>
+            <option value="dry">Dry</option>
+            <option value="sensitive">Sensitive</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <h4>Max Price</h4>
+          <input type="range" id="priceFilter" min="200" max="700" step="10" value="700">
+          <div class="price-out"><span id="priceOut">₹700</span> or under</div>
+        </div>
+        <div class="filter-group">
+          <h4>Only Show</h4>
+          <label><input type="checkbox" id="veganOnly"> Vegan / Paraben-free</label>
+        </div>
+        <button class="btn btn-outline btn-sm" id="resetFilters" style="width:100%; justify-content:center;">Reset filters</button>
+      </aside>
+
+      <div class="product-grid" id="productGrid"></div>
+    </div>
+  </div>
+</section>
+
+<section class="bill-section">
+  <div class="wrap bill-layout">
+    <div class="bill-copy">
+      <span class="eyebrow">Your Live Bill</span>
+      <h2>The parchi calculator.</h2>
+      <p>Add products and watch the total add up in real time, just like a bill at the counter — then send it to us directly on WhatsApp to confirm your order.</p>
+      <ul>
+        <li>✓ No login, no cart abandonment — just a running total</li>
+        <li>✓ Delivery or pickup — tell us which when you message</li>
+        <li>✓ Pay by UPI, card, or Cash on Delivery when we confirm</li>
+      </ul>
+    </div>
+
+    <div class="receipt">
+      <div class="receipt-head">
+        <div class="store">RAJEEV COSMETICS STORE</div>
+        <div class="mono" id="receiptDate"></div>
+      </div>
+      <div id="billItems"><div class="bill-empty">Your bill is empty — add a product to get started.</div></div>
+      <div class="bill-totals">
+        <div class="row"><span>Subtotal</span><span id="subtotalOut">₹0</span></div>
+        <div class="row"><span>Estimated GST (18%)</span><span id="gstOut">₹0</span></div>
+        <div class="row grand"><span>Total</span><span id="totalOut">₹0</span></div>
+      </div>
+      <div class="receipt-actions">
+        <button class="btn btn-outline" id="clearBill" style="border-color:var(--plum); color:var(--plum);">Clear</button>
+        <a class="btn btn-primary" id="sendWaOrder" href="https://wa.me/916206968481" target="_blank" rel="noopener">Send Order on WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="trust">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Trust</span>
+      <h2>What regulars say.</h2>
+    </div>
+    <div class="trust-grid">
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p>"Rajeev bhaiya khud suggest karte hain kaunsa shade suit karega — online se kabhi galat product nahi aaya."</p>
+        <div class="who">— Priya S., regular customer</div>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p>"WhatsApp pe order kiya, same day delivery mil gayi. Prices bhi market se better hain."</p>
+        <div class="who">— Ayesha K., regular customer</div>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★☆</div>
+        <p>"Ingredient labels clearly likhe hote hain, sensitive skin ke liye options bhi mil jaate hain."</p>
+        <div class="who">— Neha R., regular customer</div>
+      </div>
+    </div>
+    <div class="badge-row">
+      <span class="badge-pill">🐇 Cruelty-Free Picks</span>
+      <span class="badge-pill">↩️ Easy 7-Day Returns</span>
+      <span class="badge-pill">💵 Cash on Delivery</span>
+      <span class="badge-pill">🧴 Ingredient Labels Shown</span>
+    </div>
+  </div>
+</section>
+
+<section id="about" style="background:var(--paper); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="wrap about-layout">
+    <img src="images/storefront.png" alt="Storefront of Rajeev Cosmetics Store">
+    <div>
+      <span class="eyebrow" style="color:var(--rani);">About Us</span>
+      <h2 style="font-size:clamp(24px,3vw,32px); color:var(--plum); margin:8px 0 14px;">Run by people who'll actually answer your questions.</h2>
+      <p style="color:var(--taupe); font-size:15px; max-width:520px;">Rajeev Cosmetics Store has been helping customers find the right shade, the right routine, and the right price — in person and now on WhatsApp too. We list ingredients clearly, flag vegan and paraben-free picks, and never push a product we wouldn't recommend to family.</p>
+    </div>
+  </div>
+</section>
+
+<section id="visit" class="split-section">
+  <div class="wrap split-grid">
+    <div class="info-card">
+      <h3>Visit or message us</h3>
+      <div class="info-row"><span class="icon">📍</span><span>Find us on Google Maps — tap below for turn-by-turn directions.<br><a href="https://maps.app.goo.gl/byHJzw2TJXMTNQ6B6" target="_blank" rel="noopener" style="text-decoration:underline; color:#fff;">Open in Google Maps →</a></span></div>
+      <div class="info-row"><span class="icon">📞</span><span>Call or WhatsApp: <a href="tel:+916206968481" style="text-decoration:underline;">+91 62069 68481</a></span></div>
+      <div class="info-row"><span class="icon">💬</span><span><a href="https://wa.me/916206968481" target="_blank" rel="noopener" style="text-decoration:underline;">Chat with us on WhatsApp</a> for quick questions or to confirm an order.</span></div>
+      <div class="info-row"><span class="icon">🕒</span><span>Store hours: update these with your actual timings — placeholder shown as 10 AM – 9 PM, all days.</span></div>
+      <div class="owner-panel" id="ownerPanel">
+        <p>Owner/staff status (toggle when you're on-site — visible to all visitors, no password yet):</p>
+        <div class="status-btns" id="statusBtns">
+          <button data-status="owner">🟢 Owner In-Store</button>
+          <button data-status="staff">🔵 Staff Available</button>
+          <button data-status="closed">⚪ Closed Now</button>
+        </div>
+      </div>
+      <button class="owner-link" id="toggleOwnerPanel" style="margin-top:14px;">Store status settings (owner use)</button>
+    </div>
+
+    <div class="info-card">
+      <h3>Book a visit or consult</h3>
+      <form class="appt" id="apptForm">
+        <div>
+          <label for="apName">Your name</label>
+          <input type="text" id="apName" placeholder="Your name" required>
+        </div>
+        <div>
+          <label for="apPhone">Phone number</label>
+          <input type="tel" id="apPhone" placeholder="10-digit mobile number" required>
+        </div>
+        <div>
+          <label for="apService">What's this for</label>
+          <select id="apService">
+            <option>Skin Consultation</option>
+            <option>Makeup Trial</option>
+            <option>Product Demo</option>
+            <option>Just Browsing / Other</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:12px;">
+          <div style="flex:1;">
+            <label for="apDate">Preferred date</label>
+            <input type="date" id="apDate" required>
+          </div>
+          <div style="flex:1;">
+            <label for="apTime">Preferred time</label>
+            <input type="time" id="apTime" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-gold" style="justify-content:center;">Request on WhatsApp</button>
+        <div class="form-msg" id="apptMsg"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="newsletter">
+  <div class="wrap newsletter-box">
+    <span class="eyebrow" style="color:var(--rani);">Stay Updated</span>
+    <h2 style="font-size:26px; color:var(--plum); margin-top:8px;">Get 10% off your first WhatsApp order.</h2>
+    <p style="color:var(--taupe); font-size:14px; margin-top:8px;">Drop your number and we'll send new arrivals and offers straight to WhatsApp.</p>
+    <form class="newsletter-form" id="newsletterForm">
+      <input type="tel" id="newsletterPhone" placeholder="Your WhatsApp number" required>
+      <button class="btn btn-primary" type="submit">Get 10% Off</button>
+    </form>
+    <div class="form-msg" id="newsletterMsg" style="color:var(--taupe); margin-top:8px;"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div>
+      <h4>Rajeev Cosmetics Store</h4>
+      <p style="max-width:280px; color:#C9B3C2;">Your neighbourhood beauty counter — genuine products, honest advice, now on WhatsApp too.</p>
+    </div>
+    <div>
+      <h4>Policies</h4>
+      <details><summary>Shipping Policy</summary><p style="color:#C9B3C2;">Update with your real delivery areas and timelines — e.g. same-day delivery within city limits, 2–3 days outside.</p></details>
+      <details><summary>Returns Policy</summary><p style="color:#C9B3C2;">Update with your real terms — e.g. unopened items returnable within 7 days with receipt.</p></details>
+      <details><summary>Refunds</summary><p style="color:#C9B3C2;">Update with your real refund process and timelines.</p></details>
+    </div>
+    <div>
+      <h4>Quick Links</h4>
+      <p><a href="#shop">Shop</a></p>
+      <p><a href="#visit">Book a Visit</a></p>
+      <p><a href="https://wa.me/916206968481" target="_blank" rel="noopener">WhatsApp Us</a></p>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>© 2026 Rajeev Cosmetics Store</span>
+    <span>Built with care, run in person.</span>
+  </div>
+</footer>
+
+<a class="float-wa" href="https://wa.me/916206968481" target="_blank" rel="noopener">💬 Chat Now</a>
+
+<script>
+(function(){
+  const WA_NUMBER = "916206968481";
+
+  const products = [
+    {id:1, name:"Matte Liquid Lipstick — Ruby Red", cat:"Lips", price:399, skin:"all", tags:["Vegan"]},
+    {id:2, name:"Silk Finish Compact Powder", cat:"Face", price:349, skin:"oily", tags:["Bestseller"]},
+    {id:3, name:"Aloe Hydrating Day Cream", cat:"Skincare", price:299, skin:"dry", tags:["Paraben-free"]},
+    {id:4, name:"Charcoal Deep Cleanse Face Wash", cat:"Skincare", price:249, skin:"oily", tags:["Vegan"]},
+    {id:5, name:"Volumising Mascara — Jet Black", cat:"Eyes", price:329, skin:"all", tags:["Cruelty-free"]},
+    {id:6, name:"Rose Gold Eyeshadow Palette", cat:"Eyes", price:599, skin:"all", tags:["Bestseller"]},
+    {id:7, name:"Argan Oil Hair Serum", cat:"Haircare", price:449, skin:"all", tags:["Paraben-free"]},
+    {id:8, name:"Keratin Smooth Shampoo 200ml", cat:"Haircare", price:379, skin:"dry", tags:[]},
+    {id:9, name:"Precision Makeup Brush Set (5pc)", cat:"Tools", price:599, skin:"all", tags:["Tools"]},
+    {id:10, name:"Nude Matte Lip Kit", cat:"Lips", price:499, skin:"sensitive", tags:["Vegan"]},
+  ];
+
+  const categories = ["All","Face","Eyes","Lips","Skincare","Haircare","Tools"];
+  let activeCategory = "All";
+  let cart = {}; // id -> qty
+
+  const grid = document.getElementById('productGrid');
+  const chipRow = document.getElementById('categoryChips');
+  const skinFilter = document.getElementById('skinFilter');
+  const priceFilter = document.getElementById('priceFilter');
+  const priceOut = document.getElementById('priceOut');
+  const veganOnly = document.getElementById('veganOnly');
+
+  function renderChips(){
+    chipRow.innerHTML = categories.map(c =>
+      `<button class="chip ${c===activeCategory?'active':''}" data-cat="${c}">${c}</button>`
+    ).join('');
+    chipRow.querySelectorAll('.chip').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ activeCategory = btn.dataset.cat; renderChips(); renderGrid(); });
+    });
+  }
+
+  function money(n){ return "₹" + n.toLocaleString('en-IN'); }
+
+  function renderGrid(){
+    const maxPrice = Number(priceFilter.value);
+    const skin = skinFilter.value;
+    const vOnly = veganOnly.checked;
+    priceOut.textContent = money(maxPrice);
+
+    const filtered = products.filter(p=>{
+      if(activeCategory !== "All" && p.cat !== activeCategory) return false;
+      if(p.price > maxPrice) return false;
+      if(skin !== "all" && p.skin !== "all" && p.skin !== skin) return false;
+      if(vOnly && !p.tags.some(t=>t==="Vegan"||t==="Paraben-free")) return false;
+      return true;
+    });
+
+    if(filtered.length === 0){
+      grid.innerHTML = `<div class="empty-note">No products match these filters. Try widening your price range or skin type.</div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(p=>`
+      <div class="card">
+        <img src="images/product-${p.id}.png" alt="${p.name}">
+        <div class="card-body">
+          <div class="card-tags">${p.tags.map(t=>`<span class="tag">${t}</span>`).join('')}<span class="tag">${p.cat}</span></div>
+          <div class="card-name">${p.name}</div>
+          <div class="card-bottom">
+            <span class="price">${money(p.price)}</span>
+            <button class="add-btn" data-id="${p.id}">Add to Bill</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('.add-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = Number(btn.dataset.id);
+        cart[id] = (cart[id]||0) + 1;
+        saveCart();
+        renderBill();
+      });
+    });
+  }
+
+  // ---------- Bill / Receipt ----------
+  const billItemsEl = document.getElementById('billItems');
+  const subtotalOut = document.getElementById('subtotalOut');
+  const gstOut = document.getElementById('gstOut');
+  const totalOut = document.getElementById('totalOut');
+  const sendWaOrder = document.getElementById('sendWaOrder');
+  const receiptDate = document.getElementById('receiptDate');
+
+  function renderBill(){
+    const ids = Object.keys(cart).filter(id => cart[id] > 0);
+    if(ids.length === 0){
+      billItemsEl.innerHTML = `<div class="bill-empty">Your bill is empty — add a product to get started.</div>`;
+    } else {
+      billItemsEl.innerHTML = ids.map(id=>{
+        const p = products.find(x=>x.id === Number(id));
+        const qty = cart[id];
+        return `<div class="bill-row">
+          <span>${p.name}</span>
+          <span class="mono">${money(p.price * qty)}</span>
+          <span class="qty-controls">
+            <button data-id="${id}" data-delta="-1">−</button>
+            <span class="mono">${qty}</span>
+            <button data-id="${id}" data-delta="1">+</button>
+          </span>
+        </div>`;
+      }).join('');
+
+      billItemsEl.querySelectorAll('button').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const id = btn.dataset.id;
+          const delta = Number(btn.dataset.delta);
+          cart[id] = (cart[id]||0) + delta;
+          if(cart[id] <= 0) delete cart[id];
+          saveCart();
+          renderBill();
+        });
+      });
+    }
+
+    const subtotal = Object.keys(cart).reduce((sum,id)=>{
+      const p = products.find(x=>x.id===Number(id));
+      return sum + (p ? p.price * cart[id] : 0);
+    }, 0);
+    const gst = Math.round(subtotal * 0.18);
+    const total = subtotal + gst;
+    subtotalOut.textContent = money(subtotal);
+    gstOut.textContent = money(gst);
+    totalOut.textContent = money(total);
+
+    if(subtotal === 0){
+      sendWaOrder.href = `https://wa.me/${WA_NUMBER}`;
+    } else {
+      const lines = Object.keys(cart).map(id=>{
+        const p = products.find(x=>x.id===Number(id));
+        return `${cart[id]}x ${p.name} — ${money(p.price*cart[id])}`;
+      });
+      const msg = `Hi! I'd like to order:%0A${lines.map(l=>encodeURIComponent(l)).join('%0A')}%0A%0ATotal (incl. est. GST): ${encodeURIComponent(money(total))}%0A%0APlease confirm availability and delivery/pickup.`;
+      sendWaOrder.href = `https://wa.me/${WA_NUMBER}?text=${msg}`;
+    }
+  }
+
+  document.getElementById('clearBill').addEventListener('click', ()=>{
+    cart = {};
+    saveCart();
+    renderBill();
+  });
+
+  async function saveCart(){
+    try{
+      await window.storage.set('cart', JSON.stringify(cart), false);
+    }catch(e){ console.error('Could not save cart', e); }
+  }
+  async function loadCart(){
+    try{
+      const res = await window.storage.get('cart', false);
+      if(res && res.value) cart = JSON.parse(res.value);
+    }catch(e){ /* no saved cart yet */ }
+    renderBill();
+  }
+
+  // ---------- Store status ----------
+  const statusText = document.getElementById('statusText');
+  const statusStrip = document.getElementById('statusStrip');
+  const statusLabels = {
+    owner: {label:"Rajeev is in-store right now — drop by for a full consult.", dot:"owner"},
+    staff: {label:"Our staff is available in-store to help you.", dot:"staff"},
+    closed: {label:"We're closed right now — message us on WhatsApp and we'll reply soon.", dot:"closed"}
+  };
+
+  function renderStatus(status){
+    const s = statusLabels[status] || statusLabels.staff;
+    statusStrip.innerHTML = `<span class="dot ${s.dot}"></span> <span>${s.label}</span>`;
+    document.querySelectorAll('#statusBtns button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.status === status);
+    });
+  }
+
+  async function loadStatus(){
+    try{
+      const res = await window.storage.get('store-status', true);
+      renderStatus(res && res.value ? res.value : 'staff');
+    }catch(e){
+      renderStatus('staff');
+    }
+  }
+
+  document.getElementById('statusBtns').addEventListener('click', async (e)=>{
+    const btn = e.target.closest('button[data-status]');
+    if(!btn) return;
+    const status = btn.dataset.status;
+    renderStatus(status);
+    try{
+      await window.storage.set('store-status', status, true);
+    }catch(err){ console.error('Could not save store status', err); }
+  });
+
+  document.getElementById('toggleOwnerPanel').addEventListener('click', ()=>{
+    document.getElementById('ownerPanel').classList.toggle('open');
+  });
+
+  // ---------- Appointment form ----------
+  document.getElementById('apptForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const name = document.getElementById('apName').value.trim();
+    const phone = document.getElementById('apPhone').value.trim();
+    const service = document.getElementById('apService').value;
+    const date = document.getElementById('apDate').value;
+    const time = document.getElementById('apTime').value;
+    const msg = `Hi, I'd like to book: ${service}%0AName: ${encodeURIComponent(name)}%0APhone: ${encodeURIComponent(phone)}%0APreferred date: ${date}%0APreferred time: ${time}`;
+    window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
+    document.getElementById('apptMsg').textContent = "Opening WhatsApp to confirm your booking…";
+  });
+
+  // ---------- Newsletter (demo only, not connected to a real messaging service) ----------
+  document.getElementById('newsletterForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    document.getElementById('newsletterMsg').textContent = "Thanks! (Connect this form to your WhatsApp Business API or an SMS/email tool to make it fully live.)";
+    document.getElementById('newsletterForm').reset();
+  });
+
+  // ---------- Filter listeners ----------
+  skinFilter.addEventListener('change', renderGrid);
+  priceFilter.addEventListener('input', renderGrid);
+  veganOnly.addEventListener('change', renderGrid);
+  document.getElementById('resetFilters').addEventListener('click', ()=>{
+    activeCategory = "All"; skinFilter.value = "all"; priceFilter.value = 700; veganOnly.checked = false;
+    renderChips(); renderGrid();
+  });
+
+  receiptDate.textContent = new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'});
+
+  renderChips();
+  renderGrid();
+  loadCart();
+  loadStatus();
+})();
+</script>
+</body>
+</html>
