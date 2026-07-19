@@ -187,6 +187,19 @@
   .bill-totals .grand{font-size:16px; font-weight:700; color:var(--plum); border-top:1px solid var(--ink); margin-top:6px; padding-top:8px;}
   .receipt-actions{display:flex; gap:10px; margin-top:18px;}
   .receipt-actions .btn{flex:1; justify-content:center;}
+  .checkout-fields{display:flex; flex-direction:column; gap:8px; margin-top:14px; border-top:1px dashed var(--line); padding-top:14px;}
+  .co-input{width:100%; padding:9px 10px; border-radius:6px; border:1px solid var(--line); font-size:13px; font-family:'Work Sans', sans-serif; background:#fff; color:var(--ink);}
+  #placeOrderBtn:disabled{opacity:0.6; cursor:not-allowed;}
+  .status-pill{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; padding:5px 10px; border-radius:999px; display:inline-block;}
+  .status-pending{background:#FBE7C6; color:#8A5A00;}
+  .status-accepted{background:#D8F0DC; color:#1E7A34;}
+  .status-rejected{background:#F5D9DD; color:#9E1E2E;}
+  .status-delivered{background:#DCE3F5; color:#2A3E9E;}
+  .track-card{background:var(--ivory); border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin-bottom:12px;}
+  .track-card-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:13px; color:var(--taupe);}
+  .track-card ul{list-style:none; margin:0 0 8px; padding:0; font-size:13px;}
+  .track-card li{display:flex; justify-content:space-between; padding:4px 0;}
+  .track-card .total{font-weight:700; font-size:14px; border-top:1px dashed var(--line); padding-top:8px;}
 
   /* ---------- Trust ---------- */
   .trust-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
@@ -382,11 +395,35 @@
         <div class="row"><span>Estimated GST (18%)</span><span id="gstOut">₹0</span></div>
         <div class="row grand"><span>Total</span><span id="totalOut">₹0</span></div>
       </div>
+      <div class="checkout-fields">
+        <input type="text" id="coName" placeholder="Your name" class="co-input">
+        <input type="tel" id="coPhone" placeholder="Phone number" class="co-input">
+        <select id="coFulfillment" class="co-input">
+          <option value="Pickup">I'll pick up from the shop</option>
+          <option value="Delivery">Deliver to my home</option>
+        </select>
+      </div>
       <div class="receipt-actions">
         <button class="btn btn-outline" id="clearBill" style="border-color:var(--plum); color:var(--plum);">Clear</button>
-        <a class="btn btn-primary" id="sendWaOrder" href="https://wa.me/916206968481" target="_blank" rel="noopener">Send Order on WhatsApp</a>
+        <button class="btn btn-primary" id="placeOrderBtn">Place Order</button>
       </div>
+      <div class="form-msg" id="orderMsg" style="color:var(--taupe); margin-top:10px;"></div>
     </div>
+  </div>
+</section>
+
+<section id="trackOrder" style="background:var(--paper); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow" style="color:var(--rani);">Track Order</span>
+      <h2 style="color:var(--plum);">Check your order status.</h2>
+      <p>Enter the phone number you placed the order with to see where it stands.</p>
+    </div>
+    <div style="display:flex; gap:10px; max-width:420px; margin-bottom:20px;">
+      <input type="tel" id="trackPhone" placeholder="Your phone number" class="co-input" style="flex:1;">
+      <button class="btn btn-primary" id="trackBtn">Check Status</button>
+    </div>
+    <div id="trackResults"></div>
   </div>
 </section>
 
@@ -529,9 +566,13 @@
 
 <a class="float-wa" href="https://wa.me/916206968481" target="_blank" rel="noopener">💬 Chat Now</a>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
   const WA_NUMBER = "916206968481";
+  const SUPABASE_URL = "https://vqqrkoanokrhidjjbgej.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_6jDww68WN6gHZoCzBIsCiw_fRjzIImf";
+  const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
   const products = [
     {id:1, name:"Matte Liquid Lipstick — Ruby Red", cat:"Lips", price:399, skin:"all", tags:["Vegan"]},
@@ -616,8 +657,10 @@
   const subtotalOut = document.getElementById('subtotalOut');
   const gstOut = document.getElementById('gstOut');
   const totalOut = document.getElementById('totalOut');
-  const sendWaOrder = document.getElementById('sendWaOrder');
+  const placeOrderBtn = document.getElementById('placeOrderBtn');
+  const orderMsg = document.getElementById('orderMsg');
   const receiptDate = document.getElementById('receiptDate');
+  let currentOrder = { subtotal:0, gst:0, total:0, lines:[] };
 
   function renderBill(){
     const ids = Object.keys(cart).filter(id => cart[id] > 0);
@@ -660,17 +703,64 @@
     gstOut.textContent = money(gst);
     totalOut.textContent = money(total);
 
-    if(subtotal === 0){
-      sendWaOrder.href = `https://wa.me/${WA_NUMBER}`;
-    } else {
-      const lines = Object.keys(cart).map(id=>{
-        const p = products.find(x=>x.id===Number(id));
-        return `${cart[id]}x ${p.name} — ${money(p.price*cart[id])}`;
-      });
-      const msg = `Hi! I'd like to order:%0A${lines.map(l=>encodeURIComponent(l)).join('%0A')}%0A%0ATotal (incl. est. GST): ${encodeURIComponent(money(total))}%0A%0APlease confirm availability and delivery/pickup.`;
-      sendWaOrder.href = `https://wa.me/${WA_NUMBER}?text=${msg}`;
-    }
+    const lineItems = Object.keys(cart).map(id=>{
+      const p = products.find(x=>x.id===Number(id));
+      return { name: p.name, qty: cart[id], price: p.price, lineTotal: p.price*cart[id] };
+    });
+    currentOrder = { subtotal, gst, total, lines: lineItems };
+    placeOrderBtn.disabled = lineItems.length === 0;
   }
+
+  async function placeOrder(){
+    const name = document.getElementById('coName').value.trim();
+    const phone = document.getElementById('coPhone').value.trim();
+    const fulfillment = document.getElementById('coFulfillment').value;
+
+    if(currentOrder.lines.length === 0){
+      orderMsg.textContent = "Add at least one product before placing an order.";
+      return;
+    }
+    if(!name || !phone){
+      orderMsg.textContent = "Please enter your name and phone number so we can confirm the order.";
+      return;
+    }
+
+    placeOrderBtn.disabled = true;
+    orderMsg.textContent = "Placing your order…";
+
+    let savedToBackend = false;
+    if(supabaseClient){
+      try{
+        const { error } = await supabaseClient.from('orders').insert({
+          customer_name: name,
+          customer_phone: phone,
+          fulfillment: fulfillment,
+          items: currentOrder.lines,
+          subtotal: currentOrder.subtotal,
+          gst: currentOrder.gst,
+          total: currentOrder.total
+        });
+        if(error) throw error;
+        savedToBackend = true;
+      }catch(e){
+        console.error('Could not save order to backend', e);
+      }
+    }
+
+    const lineText = currentOrder.lines.map(l => `${l.qty}x ${l.name} — ${money(l.lineTotal)}`);
+    const msg = `Hi, I'm ${encodeURIComponent(name)} (${encodeURIComponent(phone)}). I'd like to order:%0A${lineText.map(l=>encodeURIComponent(l)).join('%0A')}%0A%0ATotal (incl. est. GST): ${encodeURIComponent(money(currentOrder.total))}%0A${encodeURIComponent(fulfillment)}%0A%0APlease confirm.`;
+    window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
+
+    orderMsg.textContent = savedToBackend
+      ? "Order placed! We've received it on our end and opened WhatsApp to confirm."
+      : "Order sent via WhatsApp. (It couldn't reach our backend just now, so please make sure to send the WhatsApp message to confirm.)";
+
+    cart = {};
+    saveCart();
+    renderBill();
+  }
+
+  placeOrderBtn.addEventListener('click', placeOrder);
 
   document.getElementById('clearBill').addEventListener('click', ()=>{
     cart = {};
@@ -765,6 +855,44 @@
   renderChips();
   renderGrid();
   loadCart();
+  // ---------- Track order ----------
+  function money2(n){ return "₹" + Number(n).toLocaleString('en-IN'); }
+  function trackTimeFmt(iso){
+    return new Date(iso).toLocaleString('en-IN', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+  }
+  async function checkOrderStatus(){
+    const phone = document.getElementById('trackPhone').value.trim();
+    const resultsEl = document.getElementById('trackResults');
+    if(!phone){
+      resultsEl.innerHTML = `<div class="bill-empty">Enter the phone number you ordered with.</div>`;
+      return;
+    }
+    if(!supabaseClient){
+      resultsEl.innerHTML = `<div class="bill-empty">Order tracking isn't connected right now.</div>`;
+      return;
+    }
+    resultsEl.innerHTML = `<div class="bill-empty">Checking…</div>`;
+    const { data, error } = await supabaseClient.rpc('get_orders_by_phone', { p_phone: phone });
+    if(error){
+      console.error(error);
+      resultsEl.innerHTML = `<div class="bill-empty">Couldn't check right now — please try again or message us on WhatsApp.</div>`;
+      return;
+    }
+    if(!data || data.length === 0){
+      resultsEl.innerHTML = `<div class="bill-empty">No orders found for that number.</div>`;
+      return;
+    }
+    resultsEl.innerHTML = data.map(o=>{
+      const items = (o.items||[]).map(i=>`<li><span>${i.qty}x ${i.name}</span><span class="mono">${money2(i.lineTotal)}</span></li>`).join('');
+      return `<div class="track-card">
+        <div class="track-card-top"><span>${trackTimeFmt(o.created_at)} · ${o.fulfillment}</span><span class="status-pill status-${o.status}">${o.status}</span></div>
+        <ul>${items}</ul>
+        <div class="total">Total ${money2(o.total)}</div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('trackBtn').addEventListener('click', checkOrderStatus);
+
   loadStatus();
 })();
 </script>

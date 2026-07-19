@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orders — Rajeev Cosmetics Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --plum:#2A0F29; --ivory:#FFF8F2; --paper:#FFFDF8; --ink:#241119; --taupe:#7A6159;
+    --gold:#E8A33D; --rani:#C81259; --rani-dark:#9E0E46; --line:#E4D3C6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Work Sans',sans-serif; background:var(--ivory); color:var(--ink);}
+  h1,h2{font-family:'Fraunces',serif; margin:0;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .wrap{max-width:840px; margin:0 auto; padding:32px 20px 60px;}
+  header{display:flex; justify-content:space-between; align-items:center; margin-bottom:26px;}
+  header h1{font-size:22px; color:var(--plum);}
+  header span{font-size:12px; color:var(--taupe);}
+  button{font-family:inherit; cursor:pointer;}
+  .btn{padding:9px 16px; border-radius:6px; border:1.5px solid transparent; font-weight:600; font-size:13px;}
+  .btn-primary{background:var(--rani); color:#fff;}
+  .btn-primary:hover{background:var(--rani-dark);}
+  .btn-outline{background:transparent; border-color:var(--plum); color:var(--plum);}
+  .btn-outline:hover{background:var(--plum); color:#fff;}
+  .btn-ghost{background:none; border:none; color:var(--taupe); text-decoration:underline; font-size:12px;}
+
+  #loginScreen{max-width:360px; margin:80px auto; background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:30px;}
+  #loginScreen h2{font-size:20px; color:var(--plum); margin-bottom:6px;}
+  #loginScreen p{font-size:13px; color:var(--taupe); margin:0 0 20px;}
+  #loginScreen label{font-size:12px; font-weight:600; color:var(--taupe); display:block; margin-bottom:5px;}
+  #loginScreen input{width:100%; padding:10px; border-radius:6px; border:1px solid var(--line); margin-bottom:14px; font-size:14px;}
+  #loginMsg{font-size:13px; color:var(--rani); min-height:18px;}
+
+  #dashboard{display:none;}
+  .empty-state{text-align:center; color:var(--taupe); padding:60px 20px; border:1px dashed var(--line); border-radius:10px; font-size:14px;}
+
+  .order-card{background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:20px; margin-bottom:16px;}
+  .order-top{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:12px;}
+  .order-top .who{font-weight:700; font-size:15px;}
+  .order-top .when{font-size:12px; color:var(--taupe);}
+  .status-pill{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; padding:5px 10px; border-radius:999px;}
+  .status-pending{background:#FBE7C6; color:#8A5A00;}
+  .status-accepted{background:#D8F0DC; color:#1E7A34;}
+  .status-rejected{background:#F5D9DD; color:#9E1E2E;}
+  .status-delivered{background:#DCE3F5; color:#2A3E9E;}
+  .order-meta{font-size:13px; color:var(--taupe); margin-bottom:10px;}
+  .order-items{list-style:none; margin:0 0 12px; padding:0; font-size:13px; border-top:1px dashed var(--line); border-bottom:1px dashed var(--line);}
+  .order-items li{display:flex; justify-content:space-between; padding:6px 0;}
+  .order-total{display:flex; justify-content:space-between; font-weight:700; font-size:14px; margin-bottom:14px;}
+  .order-actions{display:flex; gap:8px; flex-wrap:wrap;}
+  .order-actions button{padding:7px 14px; border-radius:6px; border:1px solid var(--line); background:#fff; font-size:12px; font-weight:600;}
+  .order-actions button.accept{border-color:#1E7A34; color:#1E7A34;}
+  .order-actions button.reject{border-color:#9E1E2E; color:#9E1E2E;}
+  .order-actions button.delivered{border-color:#2A3E9E; color:#2A3E9E;}
+  .conn-note{font-size:12px; color:var(--taupe); margin-top:24px; text-align:center;}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <h2>Rajeev Cosmetics Store</h2>
+  <p>Sign in with your Supabase owner account to view and manage orders.</p>
+  <label for="loginEmail">Email</label>
+  <input type="email" id="loginEmail" placeholder="you@example.com">
+  <label for="loginPassword">Password</label>
+  <input type="password" id="loginPassword" placeholder="Your password">
+  <button class="btn btn-primary" id="loginBtn" style="width:100%;">Sign In</button>
+  <div id="loginMsg"></div>
+</div>
+
+<div id="dashboard">
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Orders</h1>
+        <span id="signedInAs"></span>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="btn btn-outline" id="refreshBtn">Refresh</button>
+        <button class="btn-ghost" id="logoutBtn">Sign out</button>
+      </div>
+    </header>
+    <div id="ordersList"></div>
+    <p class="conn-note">Orders update automatically as customers place them — leave this page open at the counter.</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  const SUPABASE_URL = "https://vqqrkoanokrhidjjbgej.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_6jDww68WN6gHZoCzBIsCiw_fRjzIImf";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const loginScreen = document.getElementById('loginScreen');
+  const dashboard = document.getElementById('dashboard');
+  const loginMsg = document.getElementById('loginMsg');
+  const ordersList = document.getElementById('ordersList');
+  const signedInAs = document.getElementById('signedInAs');
+
+  function money(n){ return "₹" + Number(n).toLocaleString('en-IN'); }
+  function timeAgo(iso){
+    const d = new Date(iso);
+    return d.toLocaleString('en-IN', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+  }
+
+  async function checkSession(){
+    const { data } = await supabaseClient.auth.getSession();
+    if(data && data.session){
+      showDashboard(data.session.user.email);
+    }
+  }
+
+  function showDashboard(email){
+    loginScreen.style.display = 'none';
+    dashboard.style.display = 'block';
+    signedInAs.textContent = "Signed in as " + email;
+    loadOrders();
+    subscribeToOrders();
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', async ()=>{
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    loginMsg.textContent = "Signing in…";
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if(error){
+      loginMsg.textContent = "Could not sign in — check your email/password.";
+      return;
+    }
+    loginMsg.textContent = "";
+    showDashboard(data.user.email);
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+    await supabaseClient.auth.signOut();
+    dashboard.style.display = 'none';
+    loginScreen.style.display = 'block';
+  });
+
+  document.getElementById('refreshBtn').addEventListener('click', loadOrders);
+
+  function orderCard(order){
+    const statusClass = "status-" + order.status;
+    const itemsHtml = (order.items || []).map(i =>
+      `<li><span>${i.qty}x ${i.name}</span><span class="mono">${money(i.lineTotal)}</span></li>`
+    ).join('');
+
+    let actions = '';
+    if(order.status === 'pending'){
+      actions = `<button class="accept" data-id="${order.id}" data-status="accepted">Accept</button>
+                 <button class="reject" data-id="${order.id}" data-status="rejected">Reject</button>`;
+    } else if(order.status === 'accepted'){
+      actions = `<button class="delivered" data-id="${order.id}" data-status="delivered">Mark Delivered</button>`;
+    }
+
+    return `<div class="order-card" data-order-id="${order.id}">
+      <div class="order-top">
+        <div>
+          <div class="who">${order.customer_name}</div>
+          <div class="when">${timeAgo(order.created_at)} · ${order.fulfillment} · ${order.customer_phone}</div>
+        </div>
+        <span class="status-pill ${statusClass}">${order.status}</span>
+      </div>
+      <ul class="order-items">${itemsHtml}</ul>
+      <div class="order-total"><span>Total</span><span>${money(order.total)}</span></div>
+      <div class="order-actions">${actions}</div>
+    </div>`;
+  }
+
+  async function loadOrders(){
+    const { data, error } = await supabaseClient
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if(error){
+      ordersList.innerHTML = `<div class="empty-state">Couldn't load orders. Make sure the orders table and policies are set up (see README), and that you're signed in.</div>`;
+      console.error(error);
+      return;
+    }
+    if(!data || data.length === 0){
+      ordersList.innerHTML = `<div class="empty-state">No orders yet — they'll show up here the moment a customer places one.</div>`;
+      return;
+    }
+    ordersList.innerHTML = data.map(orderCard).join('');
+    attachActionHandlers();
+  }
+
+  function attachActionHandlers(){
+    ordersList.querySelectorAll('button[data-id]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const id = btn.dataset.id;
+        const status = btn.dataset.status;
+        btn.disabled = true;
+        const { error } = await supabaseClient.from('orders').update({ status }).eq('id', id);
+        if(error){ console.error(error); btn.disabled = false; return; }
+        loadOrders();
+      });
+    });
+  }
+
+  function subscribeToOrders(){
+    supabaseClient
+      .channel('orders-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+        loadOrders();
+      })
+      .subscribe();
+  }
+
+  checkSession();
+})();
+</script>
+</body>
+</html>
